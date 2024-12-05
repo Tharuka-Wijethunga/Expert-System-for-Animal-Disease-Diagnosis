@@ -86,11 +86,22 @@ class AnimalDiagnosisExpert(KnowledgeEngine):
 
     @Rule(Fact(disease=MATCH.disease))
     def conclude_diagnosis(self, disease):
+        # Collect all the facts that contributed to the diagnosis
+        matched_facts = []
+        for fact in self.facts.values():
+            if isinstance(fact, Fact) and fact != Fact(disease=disease):  # Exclude the disease fact
+                # Convert Fact object to a readable string format
+                fact_str = ", ".join([f"{key}: {value}" for key, value in fact.items()])
+                matched_facts.append(fact_str)
+
+        # Build the diagnostic explanation
+        matched_facts_str = "\n".join([f"- {fact}" for fact in matched_facts])
         reasoning = f"""Diagnosis: {disease}
 
-Diagnostic Explanation:
-- This diagnosis is based on the specific symptoms, age, and duration of symptoms you provided.
-"""
+    Diagnostic Explanation:
+    This diagnosis is based on the following facts:
+    {matched_facts_str} 
+    """
         self.result = reasoning
 
     def declare(self, fact):
